@@ -3,8 +3,15 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Input;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 
-namespace TrayIconTest
+namespace WindowsFormsApp3
 {
     class MyApplicationContext : ApplicationContext
     {
@@ -12,7 +19,21 @@ namespace TrayIconTest
         private NotifyIcon TrayIcon;
         private ContextMenuStrip TrayIconContextMenu;
         private ToolStripMenuItem CloseMenuItem;
-        string inputLanguage = System.Windows.Forms.InputLanguage.CurrentInputLanguage.LayoutName;
+        //string inputLanguage = System.Windows.Forms.InputLanguage.CurrentInputLanguage.LayoutName;
+
+        private LanguageJson lang = new LanguageJson
+        {
+            Email = "james@example.com",
+            Active = true,
+            CreatedDate = new DateTime(2013, 1, 20, 0, 0, 0, DateTimeKind.Utc),
+            Roles = new List<string>
+                                {
+                                    "User",
+                                    "Admin"
+                                }
+        };
+
+
 
 
         public MyApplicationContext()
@@ -20,25 +41,30 @@ namespace TrayIconTest
             Application.ApplicationExit += new EventHandler(this.OnApplicationExit);
             InitializeComponent();
             TrayIcon.Visible = true;
+            Form1 form1 = new Form1();
+            form1.Visible = false;
+            form1.Show();
+
+            string json_data = JsonConvert.SerializeObject(lang, Formatting.Indented);
+            MessageBox.Show(json_data);
             //Application.InputLanguageChanging += new InputLanguageChangingEventHandler(LanguageChanged);
 
-            Microsoft.Win32.SystemEvents.UserPreferenceChanged += new UserPreferenceChangedEventHandler(SystemEvents_UserPreferenceChanged);
+            // Microsoft.Win32.SystemEvents.UserPreferenceChanged += new UserPreferenceChangedEventHandler(SystemEvents_UserPreferenceChanged);
 
 
         }
 
-        private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        //private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
             
-        {
-            //throw new NotImplementedException();
-            System.Console.WriteLine(inputLanguage);
+        //{
+        //    //throw new NotImplementedException();
+        //    System.Console.WriteLine(inputLanguage);
 
-        }
+        //}
 
         private void InitializeComponent()
         {
             TrayIcon = new NotifyIcon();
-
             TrayIcon.BalloonTipIcon = ToolTipIcon.Info;
             TrayIcon.BalloonTipText =
               "I noticed that you double-clicked me! What can I do for you?";
@@ -102,18 +128,18 @@ namespace TrayIconTest
 
         //klcpublic event System.Windows.Forms.InputLanguageChangingEventHandler InputLanguageChanging;
 
-        protected virtual void LanguageChanged (InputLanguageChangingEventArgs e)
-        {
-            System.Text.StringBuilder messageBoxCS = new System.Text.StringBuilder();
-            messageBoxCS.AppendFormat("{0} = {1}", "InputLanguage", e.InputLanguage);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "Culture", e.Culture);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "SysCharSet", e.SysCharSet);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "Cancel", e.Cancel);
-            messageBoxCS.AppendLine();
-            MessageBox.Show(messageBoxCS.ToString(), "InputLanguageChanging Event");
-        }
+        //protected virtual void LanguageChanged (InputLanguageChangingEventArgs e)
+        //{
+        //    System.Text.StringBuilder messageBoxCS = new System.Text.StringBuilder();
+        //    messageBoxCS.AppendFormat("{0} = {1}", "InputLanguage", e.InputLanguage);
+        //    messageBoxCS.AppendLine();
+        //    messageBoxCS.AppendFormat("{0} = {1}", "Culture", e.Culture);
+        //    messageBoxCS.AppendLine();
+        //    messageBoxCS.AppendFormat("{0} = {1}", "SysCharSet", e.SysCharSet);
+        //    messageBoxCS.AppendLine();
+        //    messageBoxCS.AppendFormat("{0} = {1}", "Cancel", e.Cancel);
+        //    messageBoxCS.AppendLine();
+        //    MessageBox.Show(messageBoxCS.ToString(), "InputLanguageChanging Event");
+        //}
     }
 }

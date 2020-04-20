@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace TrayIconTest
+namespace WindowsFormsApp3
 {
     static class Program
     {
@@ -17,9 +17,6 @@ namespace TrayIconTest
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MyApplicationContext());
-
-
-
         }
     }
 }
