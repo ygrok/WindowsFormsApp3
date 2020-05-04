@@ -21,7 +21,25 @@ namespace WindowsFormsApp3
         private ToolStripMenuItem CloseMenuItem;
         //string inputLanguage = System.Windows.Forms.InputLanguage.CurrentInputLanguage.LayoutName;
 
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetKeyboardLayout(uint idThread);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
+
+        [DllImport("user32.dll")]
+        private static extern UInt32 GetKeyboardLayoutList(Int32 nBuff, IntPtr[] lpList);
+
+
+        private CultureInfo _currentLanaguge;
+
+
         private LanguageJson lang = new LanguageJson
+
+
         {
             Email = "james@example.com",
             Active = true,
@@ -44,12 +62,29 @@ namespace WindowsFormsApp3
             Form1 form1 = new Form1();
             form1.Visible = false;
             form1.Show();
+            //KeyboardLayouts.GetProcessKeyboardLayout().LanguageCultureInfo.ThreeLetterISOLanguageName;
+
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    HandleCurrentLanguage();
+                    //ConvertToJson(json_data);
+                    Thread.Sleep(500);
+                }
+
+            });
+
 
             string json_data = JsonConvert.SerializeObject(lang, Formatting.Indented);
             MessageBox.Show(json_data);
+            GetSystemKeyboardLayouts();
+            //string A = 
+            //foreach (KeyboardLayout kl in GetSystemKeyboardLayouts());
+
             //Application.InputLanguageChanging += new InputLanguageChangingEventHandler(LanguageChanged);
 
-            // Microsoft.Win32.SystemEvents.UserPreferenceChanged += new UserPreferenceChangedEventHandler(SystemEvents_UserPreferenceChanged);
+                // Microsoft.Win32.SystemEvents.UserPreferenceChanged += new UserPreferenceChangedEventHandler(SystemEvents_UserPreferenceChanged);
 
 
         }
@@ -125,6 +160,75 @@ namespace WindowsFormsApp3
                 Application.Exit();
             }
         }
+
+        private static CultureInfo GetCurrentCulture()
+        {
+            var l = GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), IntPtr.Zero));
+            return new CultureInfo((short)l.ToInt64());
+        }
+
+        private void HandleCurrentLanguage()
+        {
+            var currentCulture = GetCurrentCulture();
+            if (_currentLanaguge == null || _currentLanaguge.LCID != currentCulture.LCID)
+            {
+                _currentLanaguge = currentCulture;
+                MessageBox.Show(_currentLanaguge.Name);
+            }
+        }
+
+        public static List<KeyboardLayout> GetSystemKeyboardLayouts()
+        {
+            var keyboardLayouts = new List<KeyboardLayout>();
+
+            var count = GetKeyboardLayoutList(0, null);
+            var keyboardLayoutIds = new IntPtr[count];
+            GetKeyboardLayoutList(keyboardLayoutIds.Length, keyboardLayoutIds);
+
+            foreach (var keyboardLayoutId in keyboardLayoutIds)
+            {
+                var keyboardLayout = CreateKeyboardLayout((UInt32)keyboardLayoutId);
+                keyboardLayouts.Add(keyboardLayout);
+                //yield return new CultureInfo(keyboardLayoutId & 0xFFFF);
+            }
+
+            var message = string.Join(Environment.NewLine, keyboardLayouts);
+            MessageBox.Show(message);
+            return keyboardLayouts;
+        }
+
+        public void GetLanguages()
+        {
+            // Gets the list of installed languages.
+            foreach (InputLanguage lang in InputLanguage.InstalledInputLanguages)
+            {
+                    //string firstName = Form1.
+                    //dfdf = "some name";
+                    form1. += lang.Culture.EnglishName + '\n';
+            }
+        }
+
+        private static KeyboardLayout CreateKeyboardLayout(UInt32 keyboardLayoutId)
+        {
+            var languageId = (UInt16)(keyboardLayoutId & 0xFFFF);
+            var keyboardId = (UInt16)(keyboardLayoutId >> 16);
+
+            return new KeyboardLayout(keyboardLayoutId, GetCultureInfoName(languageId), GetCultureInfoName(keyboardId));
+
+            CultureInfo GetCultureInfoName(UInt16 cultureId)
+            {
+                try
+                {
+                    return CultureInfo.GetCultureInfo(cultureId);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+
 
         //klcpublic event System.Windows.Forms.InputLanguageChangingEventHandler InputLanguageChanging;
 
